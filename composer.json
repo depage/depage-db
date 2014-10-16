@@ -1,5 +1,5 @@
 {
-    "name": "depage/db",
+    "name": "Depage/DB",
     "description": "depage-pdo is a small wrapper around the pdo object which allows late/on demand initializition of the database connection.",
     "version": "1.4.0",
     "type": "library",
@@ -12,7 +12,7 @@
         "php": " >= 5.3"
     },
     "autoload": {
-        "psr-0": { "depage\\db\\": "../../" }
+        "psr-4": { "Depage\\DB\\": "" }
     },
     "support": {
         "email": "info@depage.net",
