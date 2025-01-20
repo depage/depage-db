@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file    framework/Db/Schema.php
  *
@@ -13,9 +14,9 @@ namespace Depage\Db;
 class Schema
 {
     // {{{ constants
-    const TABLENAME_TAG     = '@tablename';
-    const CONNECTION_TAG    = '@connection';
-    const VERSION_TAG       = '@version';
+    public const TABLENAME_TAG     = '@tablename';
+    public const CONNECTION_TAG    = '@connection';
+    public const VERSION_TAG       = '@version';
     // }}}
     // {{{ variables
     protected $replaceFunction = array();
@@ -103,7 +104,7 @@ class Schema
             }
         }
 
-        if(!$parser->isEndOfStatement()) {
+        if (!$parser->isEndOfStatement()) {
             throw new Exceptions\SchemaException('Incomplete statement at the end of "' . $fileName . '".');
         }
 
@@ -135,7 +136,7 @@ class Schema
     // {{{ run
     protected function run()
     {
-        foreach($this->updateData as $dataSet) {
+        foreach ($this->updateData as $dataSet) {
             extract($dataSet);
             $keys = array_keys($versions);
 
@@ -329,8 +330,7 @@ class Schema
     protected function replaceIdentifiers($dictionary, $split = array())
     {
         $replaced = array_map(
-            function ($v) use ($dictionary)
-            {
+            function ($v) use ($dictionary) {
                 if ($v['type'] == 'code') {
                     $element = array(
                         'type'      => 'code',
