@@ -19,8 +19,8 @@ class Schema
     public const VERSION_TAG       = '@version';
     // }}}
     // {{{ variables
-    protected $replaceFunction = array();
-    protected $updateData = array();
+    protected $replaceFunction = [];
+    protected $updateData = [];
     protected $dryRun;
     protected $pdo = null;
     // }}}
@@ -57,8 +57,8 @@ class Schema
 
         $parser         = new SqlParser();
         $header         = true;
-        $versions       = array();
-        $dictionary     = array();
+        $versions       = [];
+        $dictionary     = [];
         $tableName;
 
         foreach (file($fileName) as $key => $line) {
@@ -107,12 +107,18 @@ class Schema
         if (!$parser->isEndOfStatement()) {
             throw new Exceptions\SchemaException('Incomplete statement at the end of "' . $fileName . '".');
         }
+        if (empty($versions)) {
+            throw new Exceptions\SchemaException('No version tags found in "' . $fileName . '".');
+        }
+        if (empty($tableName)) {
+            throw new Exceptions\SchemaException('No tablename tag found in "' . $fileName . '".');
+        }
 
-        $this->updateData[] = array(
+        $this->updateData[] = [
             'tableName' => $this->replace($tableName),
             'statementBlock' => $statementBlock,
-            'versions' => $versions
-        );
+            'versions' => $versions,
+        ];
 
         return $this;
     }
@@ -121,7 +127,7 @@ class Schema
     public function dryRun()
     {
         $this->dryRun = true;
-        $this->history = array();
+        $this->history = [];
         $this->run();
         return $this->history;
     }
@@ -170,7 +176,7 @@ class Schema
             }
         }
 
-        $this->updateData = array();
+        $this->updateData = [];
     }
     // }}}
     // {{{ execute
@@ -254,21 +260,23 @@ class Schema
     protected function updateTableVersion($tableName, $version)
     {
         $statement = 'ALTER TABLE ' . $tableName . ' COMMENT \'' . $version . '\'';
-        $this->execute(null, array($statement));
+        $this->execute(null, [$statement]);
     }
     // }}}
 
     // {{{ extractTag
-    protected function extractTag($split = array())
+    protected function extractTag($split = [])
     {
-        $tags = array(
+        $tags = [
             self::VERSION_TAG,
             self::TABLENAME_TAG,
             self::CONNECTION_TAG,
-        );
+        ];
 
-        $comments       = array_filter($split, function ($v) { return $v['type'] == 'comment'; });
-        $matchedTags    = array();
+        $comments       = array_filter($split, function ($v) {
+            return $v['type'] == 'comment';
+        });
+        $matchedTags    = [];
 
         $values = array_values($comments);
         $values = array_shift($values);
@@ -299,8 +307,8 @@ class Schema
 
             foreach ($tags as $test) {
                 if (
-                    strpos($current, $test) !== false ||
-                    strpos($test, $current) !== false
+                    strpos($current, $test) !== false
+                    || strpos($test, $current) !== false
                 ) {
                     throw new Exceptions\SchemaException('Tags cannot be substrings of each other ("' . $current . '", "' . $test . '").');
                 }
@@ -327,22 +335,22 @@ class Schema
     }
     // }}}
     // {{{ replaceIdentifiers
-    protected function replaceIdentifiers($dictionary, $split = array())
+    protected function replaceIdentifiers($dictionary, $split = [])
     {
         $replaced = array_map(
             function ($v) use ($dictionary) {
                 if ($v['type'] == 'code') {
-                    $element = array(
+                    $element = [
                         'type'      => 'code',
                         'string'    => str_replace(array_keys($dictionary), $dictionary, $v['string']),
-                    );
+                    ];
                 } else {
                     $element = $v;
                 }
 
                 return $element;
             },
-            $split
+            $split,
         );
 
         return $replaced;
