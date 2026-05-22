@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file    framework/DB/Pdo.php
  *
@@ -34,7 +35,7 @@ class Pdo
      *
      * @return void
      */
-    public function __construct($dsn, $username = '', $password = '', $driver_options = array())
+    public function __construct($dsn, $username = '', $password = '', $driver_options = [])
     {
         $this->dsn = $dsn;
         if (strpos($dsn, "mysql:") === 0) {
@@ -87,6 +88,21 @@ class Pdo
         return $this->pdo;
     }
     // }}}
+    // {{{ unbufferedParam
+    /**
+     * helper function to set unbuffered query options for mysql
+     *
+     * @return void
+     */
+    public static function unbuffered(): array
+    {
+        if (defined("Pdo\Mysql::ATTR_USE_BUFFERED_QUERY")) {
+            return [\Pdo\Mysql::ATTR_USE_BUFFERED_QUERY => false];
+        } else {
+            return [\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false];
+        }
+    }
+    // }}}
 
     // {{{ __set
     /**
@@ -121,7 +137,7 @@ class Pdo
         }
 
         try {
-            return call_user_func_array(array($this->pdo, $name), $arguments);
+            return call_user_func_array([$this->pdo, $name], $arguments);
         } catch (\PDOException $e) {
             $message = "";
             if (in_array($name, ["prepare", "exec", "query"])) {
@@ -148,15 +164,15 @@ class Pdo
     /**
      * allows Depage\Db\Pdo-object to be serialized
      */
-    public function __sleep()
+    public function __sleep(): array
     {
-        return array(
+        return [
             'dsn',
             'username',
             'password',
             'driver_options',
             'prefix',
-        );
+        ];
     }
     // }}}
     // {{{ __wakeup()
@@ -165,9 +181,7 @@ class Pdo
      *
      * We don't need to initialize the connection because we are already initializing them late.
      */
-    public function __wakeup()
-    {
-    }
+    public function __wakeup() {}
     // }}}
 
     // {{{ dsn_parts
@@ -180,7 +194,7 @@ class Pdo
      */
     public static function parse_dsn($dsn)
     {
-        $info = array();
+        $info = [];
 
         list($info['protocol'], $rest) = explode(":", $dsn, 2);
 
